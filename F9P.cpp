@@ -211,8 +211,9 @@ int F9P::callback(GPSCallbackType type, void *data1, int data2) {
             break;
 
         case GPSCallbackType::setClock:
-            /* do nothing */
-            break;
+	case GPSCallbackType::gotRelativePositionMessage:
+	    /* do nothing */
+	    break;
     }
     return 0;
 }
