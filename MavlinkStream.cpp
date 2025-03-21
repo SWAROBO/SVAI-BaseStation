@@ -127,6 +127,8 @@ void MavlinkStream::sendMessageToVehicle(const mavlink_gps_rtcm_data_t &msg) {
         cout << "=============== Failed send to LORA ===============\n";
     }
 
+    // 안정된 전송을 위해 0.1초 지연
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
 }
 
 int MavlinkStream::sendToLora(const mavlink_message_t &msg) {
