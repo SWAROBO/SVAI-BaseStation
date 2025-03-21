@@ -11,9 +11,12 @@
 
 #define GPS_READ_BUFFER_SIZE 1024
 
-#define GPS_INFO(...) do { std::ostringstream oss; oss << __VA_ARGS__; std::cerr << oss.str() << std::endl; } while(0)
-#define GPS_WARN(...) do { std::ostringstream oss; oss << __VA_ARGS__; std::cerr << oss.str() << std::endl; } while(0)
-#define GPS_ERR(...)  do { std::ostringstream oss; oss << __VA_ARGS__; std::cerr << oss.str() << std::endl; } while(0)
+//#define GPS_INFO(...) do { std::ostringstream oss; oss << __VA_ARGS__; std::cerr << oss.str() << std::endl; } while(0)
+//#define GPS_WARN(...) do { std::ostringstream oss; oss << __VA_ARGS__; std::cerr << oss.str() << std::endl; } while(0)
+//#define GPS_ERR(...)  do { std::ostringstream oss; oss << __VA_ARGS__; std::cerr << oss.str() << std::endl; } while(0)
+#define GPS_INFO(...) do { char buffer[256]; std::snprintf(buffer, sizeof(buffer), __VA_ARGS__); std::cerr << buffer << std::endl; } while(0)
+#define GPS_WARN(...) do { char buffer[256]; std::snprintf(buffer, sizeof(buffer), __VA_ARGS__); std::cerr << buffer << std::endl; } while(0)
+#define GPS_ERR(...) do { char buffer[256]; std::snprintf(buffer, sizeof(buffer), __VA_ARGS__); std::cerr << buffer << std::endl; } while(0)
 
 
 // You may need to include or define vehicle_gps_position and satellite_info

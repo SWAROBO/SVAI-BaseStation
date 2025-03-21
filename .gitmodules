@@ -1,4 +1,4 @@
 [submodule "Drivers"]
     path = Drivers
     url = https://github.com/PX4/PX4-GPSDrivers.git
-    branch = backport-release/1.13
+    branch = 91e3dbb296d74b2a6d4f8f3c7f2fddd3c6705495

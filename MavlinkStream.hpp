@@ -2,6 +2,8 @@
 #include <arpa/inet.h>
 #include <vector>
 #include <cstring>
+#include <chrono>
+#include <thread>
 
 #include "Serial.h"
 #include "include/mavlink/common/mavlink.h"

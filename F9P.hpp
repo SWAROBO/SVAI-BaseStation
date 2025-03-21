@@ -14,8 +14,8 @@
 
 using namespace std;
 
-#define SURVEY_ACC_METER 10.0
-#define SURVEY_DURATION_SECS 180
+#define SURVEY_ACC_METER 5.00
+#define SURVEY_DURATION_SECS 30
 
 #define GPS_RECEIVE_TIMEOUT 1200
 
