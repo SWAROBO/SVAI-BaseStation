@@ -1,26 +1,81 @@
 #include "F9P.hpp"
 
+#include <base_station.h>
+#include <ubx.h>
+
+bool parseLocationParameter(const std::string &input, double &lat, double &lon, double &alt, double &acc) {
+    std::stringstream ss(input);
+    std::string token;
+
+    // 입력 문자열을 쉼표로 분리하여 4개의 값인지 확인
+    std::vector<std::string> tokens;
+    while (std::getline(ss, token, ',')) {
+        tokens.push_back(token);
+    }
+
+    if (tokens.size() != 4) {
+        std::cerr << "Error: Input must have the format lat,lon,alt,acc" << std::endl;
+        return false;
+    }
+
+    try {
+        // 각 값을 double로 변환
+        lat = std::stod(tokens[0]);
+        lon = std::stod(tokens[1]);
+        alt = std::stod(tokens[2]);
+        acc = std::stod(tokens[3]);
+    } catch (const std::exception &e) {
+        std::cerr << "Error: Invalid format or non-numeric values in input '" << input
+                  << "'. Expected format: lat,lon,alt,acc" << std::endl;
+        return false;
+    }
+
+    return true;
+}
+
 int main(int argc, char **argv) {
     string udp_ip = "192.168.219.255";
     int udp_port = 9750;
     string lora_device = "/dev/ttyUSB0";
     string f9p_device = "/dev/ttyACM0";
 
+    bool fixed_mode = false;
+    double fixed_lat = 0.0;
+    double fixed_lon = 0.0;
+    double fixed_alt = 0.0;
+    double fixed_acc = 0.0;
+
     int option;
-    while ((option = getopt(argc, argv, "i:p:l:g:")) != -1) {
+    while ((option = getopt(argc, argv, "i:p:l:g:f:")) != -1) {
         switch (option) {
             case 'i':
                 udp_ip = optarg;
                 break;
+
             case 'p':
                 udp_port = std::stoi(optarg);
                 break;
+
             case 'l':
                 lora_device = optarg;
                 break;
+
             case 'g':
                 f9p_device = optarg;
                 break;
+
+            case 'f':
+                fixed_mode = true;
+
+                // 입력 파싱 및 검증
+                if (!parseLocationParameter(optarg, fixed_lat, fixed_lon, fixed_alt, fixed_acc)) {
+                    // 입력이 잘못된 경우
+                    std::cerr << "Failed to process fixed location input." << std::endl;
+                    return 2;
+                }
+
+                break;
+
             case '?': // Unrecognized option
                 std::cerr << "Usage: " << argv[0] << " [-i ip] [-p port] [-l lora_device] [-g f9p_device]" << std::endl;
                 return 1;
@@ -29,8 +84,15 @@ int main(int argc, char **argv) {
 
     try {
         MavlinkStream mavlinkStream(udp_ip, udp_port, lora_device);
-
         F9P f9p(f9p_device, SURVEY_ACC_METER, SURVEY_DURATION_SECS, false, true, &mavlinkStream);
+
+        if (fixed_mode) {
+            f9p.setFixedBaseLocation(fixed_lat, fixed_lon, fixed_alt, fixed_acc);
+            cout << "Fixed position -> " << fixed_lat << ", " << fixed_lon << ", " << fixed_alt << " with Acc. " << fixed_acc << endl;
+
+        } else {
+            cout << "Survey in [accuracy:duration]  -> [" << SURVEY_ACC_METER << " : " << SURVEY_DURATION_SECS << "]\n";
+        }
         f9p.run();
     }
     catch (const std::exception &e) {
@@ -137,7 +199,7 @@ F9P::F9P(const string &device,
           _surveryInDurationSecs(surveryInDurationSecs), _useFixedBaseLoction(false), _requestStop(requestStop),
           _fixedBaseLatitude(0.0), _fixedBaseLongitude(0.0), _fixedBaseAltitudeMeters(0.0),
           _fixedBaseAccuracyMeters(0.0) {
-    cout << "Survey in [accuracy:duration]  -> [" << surveyInAccMeters << " : " << surveryInDurationSecs << "]\n";
+
     if (enableSatInfo) _pReportSatInfo = new satellite_info_s();
 }
 
@@ -157,6 +219,14 @@ F9P::~F9P() {
         delete _f9p;
         _f9p = nullptr;
     }
+}
+
+void F9P::setFixedBaseLocation(double lat, double lon, double alt, double acc) {
+    _useFixedBaseLoction = true;
+    _fixedBaseLatitude = lat;
+    _fixedBaseLongitude = lon;
+    _fixedBaseAltitudeMeters = alt;
+    _fixedBaseAccuracyMeters = acc;
 }
 
 void F9P::gotRTCMData(uint8_t *data, size_t len) {

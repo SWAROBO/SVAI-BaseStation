@@ -1,12 +1,8 @@
-#include <iostream>
 #include <atomic>
 #include <queue>
-#include <mutex>
+#include <sstream>
 #include <condition_variable>
-#include "Drivers/src/ubx.h"
-#include "Drivers/src/sbf.h"
-#include "Drivers/src/ashtech.h"
-#include "Drivers/src/base_station.h"
+
 #include "Drivers/src/gps_helper.h"
 #include "definitions.h"
 #include "Serial.h"
@@ -29,6 +25,7 @@ public:
         MavlinkStream* mavlinkStream);
     ~F9P();
 
+    void setFixedBaseLocation(double lat, double lon, double alt, double acc);
     void run();
 
 private:
